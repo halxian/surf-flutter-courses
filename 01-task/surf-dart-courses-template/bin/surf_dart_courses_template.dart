@@ -1,41 +1,82 @@
-class PokerPlayer {
-  /// Список текущих карт в руке у игрока
-  List<String> _currentHand = ['King of clubs', 'Nine of hearts'];
+enum PersonType { player, coach, judge }
 
-  /// Субъективная оценка выигрыша
-  double _surenessInWin = 0;
-
-  /// Вычислить шансы на выигрыш
-  void calculateProbabilities(
-    List<String> cardOnDesk,
-
-    /// Это часть первого задания. [Strategy] пока не сущестивует.
-    ///
-    /// Опишите его.
-    Strategy strategy,
-  ) =>
-      _surenessInWin = strategy(cardOnDesk, _currentHand);
+abstract class Person {
+  final String name;
+  Person({
+    required this.name,
+  });
 }
 
-typedef Strategy = double Function(
-  List<String>,
-  List<String>,
-);
+class Player extends Person {
+  final PersonType personType = PersonType.player;
 
-void main() {
-  final opponent = PokerPlayer();
+  Player({
+    required super.name,
+  });
+  void startGame() {
+    print('Начал играть');
+  }
 
-  /// Это часть первого задания. [Strategy] пока не сущестивует.
-  ///
-  /// Опишите его.
-  final Strategy fakeStrategy = (p0, p1) {
-    print(p0);
-    print(p1);
-    return 0.0;
-  };
+  void needWater() {
+    print('Дайте что нибудь с таурином');
+  }
 
-  opponent.calculateProbabilities(
-    ['Nine of diamonds', 'king of hearts'],
-    fakeStrategy,
+  void iwin() {
+    print("Я выиграл");
+  }
+
+  @override
+  String toString() => '$name\n$personType';
+}
+
+class Coach extends Person {
+  final PersonType personType = PersonType.coach;
+
+  final List<Player> students;
+
+  Coach({
+    required super.name,
+    required this.students,
+  });
+  void startTraining() {
+    print('Они начали тренироваться: $students');
+  }
+
+  @override
+  String toString() => 'Имя: $name\nУченини: ${students.map<String>((element) {
+        return element.name;
+      })}';
+}
+
+class Judge extends Person {
+  final PersonType personType = PersonType.judge;
+  final List<Player> players;
+
+  Judge({
+    required super.name,
+    required this.players,
+  });
+
+  void removePlayer(Player player) {
+    print('Игрок ${player.name} удален');
+    players.remove(player);
+  }
+
+  @override
+  String toString() => 'Имя: $name\nИгроки: ${players.map<String>((element) {
+        return element.name;
+      })}';
+}
+
+void main(List<String> args) {
+  Player player = Player(name: 'Kevin');
+  Player player1 = Player(name: 'Йцукен');
+  Player player2 = Player(name: 'Qwerty');
+  Coach coach = Coach(name: 'Trener', students: [player, player1, player2]);
+  Judge judge = Judge(
+    name: 'Судья',
+    players: [player, player1, player2],
   );
+  judge.removePlayer(player1);
+  print(judge);
 }
