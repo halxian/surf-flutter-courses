@@ -1,82 +1,67 @@
-enum PersonType { player, coach, judge }
-
-abstract class Person {
+class Product {
+  final int id;
+  final String category;
   final String name;
-  Person({
-    required this.name,
-  });
-}
+  final int price;
+  final int quantity;
 
-class Player extends Person {
-  final PersonType personType = PersonType.player;
-
-  Player({
-    required super.name,
-  });
-  void startGame() {
-    print('Начал играть');
-  }
-
-  void needWater() {
-    print('Дайте что нибудь с таурином');
-  }
-
-  void iwin() {
-    print("Я выиграл");
-  }
+  Product(this.id, this.category, this.name, this.price, this.quantity);
 
   @override
-  String toString() => '$name\n$personType';
+  String toString() {
+    return "$id $category $name $price рублей $quantity шт. \n";
+  }
 }
 
-class Coach extends Person {
-  final PersonType personType = PersonType.coach;
+abstract class Filter {
+  bool apply(Product products);
+}
 
-  final List<Player> students;
+class CategoryFilter implements Filter {
+  final String category;
 
-  Coach({
-    required super.name,
-    required this.students,
-  });
-  void startTraining() {
-    print('Они начали тренироваться: $students');
-  }
+  CategoryFilter(this.category);
 
   @override
-  String toString() => 'Имя: $name\nУченини: ${students.map<String>((element) {
-        return element.name;
-      })}';
+  bool apply(Product products) {
+    return products.category == category;
+  }
 }
 
-class Judge extends Person {
-  final PersonType personType = PersonType.judge;
-  final List<Player> players;
+class PriceFilter implements Filter {
+  final int price;
 
-  Judge({
-    required super.name,
-    required this.players,
-  });
-
-  void removePlayer(Player player) {
-    print('Игрок ${player.name} удален');
-    players.remove(player);
-  }
+  PriceFilter(this.price);
 
   @override
-  String toString() => 'Имя: $name\nИгроки: ${players.map<String>((element) {
-        return element.name;
-      })}';
+  bool apply(Product products) {
+    return products.price <= price;
+  }
 }
 
-void main(List<String> args) {
-  Player player = Player(name: 'Kevin');
-  Player player1 = Player(name: 'Йцукен');
-  Player player2 = Player(name: 'Qwerty');
-  Coach coach = Coach(name: 'Trener', students: [player, player1, player2]);
-  Judge judge = Judge(
-    name: 'Судья',
-    players: [player, player1, player2],
-  );
-  judge.removePlayer(player1);
-  print(judge);
+class WarehouseFilter implements Filter {
+  final int quantity;
+  WarehouseFilter(this.quantity);
+  @override
+  bool apply(Product products) {
+    return products.quantity < quantity;
+  }
+}
+
+void applyFilter(List<Product> products, Filter filter) {
+  final filteredProducts = products.where((e) => filter.apply(e));
+  print(filteredProducts);
+}
+
+void main() {
+  final products = [
+    Product(1, 'хлеб', 'Бородинский', 500, 5),
+    Product(2, 'хлеб', 'Белый', 200, 15),
+    Product(3, 'молоко', 'Полосатый кот', 50, 53),
+    Product(4, 'молоко', 'Коровка', 50, 53),
+    Product(5, 'вода', 'Апельсин', 25, 100),
+    Product(6, 'вода', 'Бородинский', 500, 5),
+  ];
+
+  applyFilter(products, CategoryFilter('молоко'));
 }
